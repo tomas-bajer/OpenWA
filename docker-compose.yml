@@ -49,6 +49,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: openwa-api:latest
     container_name: openwa-api
     restart: unless-stopped
     # Give the graceful drain room to complete before Docker SIGKILLs the container: the shutdown

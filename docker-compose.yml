@@ -64,6 +64,7 @@ services:
     networks:
       - openwa-network
       - internal-docker
+      - default
     # Container hardening: Chromium runs with --no-sandbox, so the
     # container itself is the confinement boundary. cap_drop ALL + a minimal re-add
     # ONLY for the root entrypoint's chown + gosu privilege-drop; once gosu setuids to
@@ -399,3 +400,4 @@ networks:
   internal-docker:
     name: openwa-internal-docker
     external: true
+  default:

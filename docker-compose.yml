@@ -1,6 +1,8 @@
 # OpenWA - Docker Compose Configuration
 # Smart Orchestration with Profiles
 
+name: openwa
+
 services:
   # ===== CORE: Docker Socket Proxy (sole container with /var/run/docker.sock access) =====
   docker-proxy:

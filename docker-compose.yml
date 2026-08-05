@@ -398,3 +398,6 @@ networks:
   internal-docker:
     name: openwa-internal-docker
     internal: true
+  # Default network alias — prevents Coolify from injecting an uncreated external network
+  default:
+    name: openwa-network

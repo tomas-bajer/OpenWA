@@ -61,6 +61,8 @@ services:
     # App network for datastores + the isolated network to reach
     # docker-proxy (DOCKER_HOST). createService() in docker.service.ts attaches
     # orchestrated containers to the literal `openwa-network`, so its name is fixed.
+    # The default network is included so openwa-api can reach separately hosted datastores
+    # (PostgreSQL, Redis) and reverse proxies (Traefik/Coolify) on the host/PaaS network.
     networks:
       - openwa-network
       - internal-docker
@@ -394,10 +396,10 @@ networks:
   # docker.service.ts attaches orchestrated containers to it by literal name.
   openwa-network:
     name: openwa-network
-    external: true
   # Isolated network for the Docker socket proxy. `internal: true` means no external
   # connectivity; only openwa-api joins it, so nothing else can reach docker-proxy:2375.
   internal-docker:
     name: openwa-internal-docker
-    external: true
+    internal: true
+  # Default network — connects openwa-api to separately-hosted datastores or reverse proxies (Coolify/Traefik).
   default:

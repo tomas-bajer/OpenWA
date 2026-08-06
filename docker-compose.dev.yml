@@ -14,6 +14,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: openwa-api:latest
+    pull_policy: build
     container_name: openwa-api
     # Container hardening — same posture as production (same Dockerfile/entrypoint).
     security_opt:

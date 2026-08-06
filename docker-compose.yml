@@ -9,11 +9,6 @@ services:
     image: tecnativa/docker-socket-proxy:v0.4.2
     container_name: openwa-docker-proxy
     restart: unless-stopped
-    # Only on the isolated internal network — reachable solely by openwa-api, NOT the
-    # dashboard or any other peer. `internal: true` also denies the proxy
-    # outbound access; it only needs the locally-mounted docker socket.
-    networks:
-      - internal-docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -58,15 +53,6 @@ services:
     # exceed Docker's 10s default, which would otherwise kill Chromium mid-teardown and orphan a
     # session profile. Tune down if you raise neither SHUTDOWN_DELAY_MS nor run many sessions.
     stop_grace_period: 45s
-    # App network for datastores + the isolated network to reach
-    # docker-proxy (DOCKER_HOST). createService() in docker.service.ts attaches
-    # orchestrated containers to the literal `openwa-network`, so its name is fixed.
-    # The default network is included so openwa-api can reach separately hosted datastores
-    # (PostgreSQL, Redis) and reverse proxies (Traefik/Coolify) on the host/PaaS network.
-    networks:
-      - openwa-network
-      - internal-docker
-      - coolify
     # Container hardening: Chromium runs with --no-sandbox, so the
     # container itself is the confinement boundary. cap_drop ALL + a minimal re-add
     # ONLY for the root entrypoint's chown + gosu privilege-drop; once gosu setuids to
@@ -288,8 +274,6 @@ services:
     container_name: openwa-postgres
     profiles: ['postgres', 'full']
     restart: unless-stopped
-    networks:
-      - openwa-network
     security_opt:
       - 'no-new-privileges:true'
     environment:
@@ -324,8 +308,6 @@ services:
     container_name: openwa-redis
     profiles: ['redis', 'full']
     restart: unless-stopped
-    networks:
-      - openwa-network
     security_opt:
       - 'no-new-privileges:true'
     # noeviction is required by BullMQ: under any other policy Redis may evict queue keys once
@@ -348,8 +330,6 @@ services:
     container_name: openwa-minio
     profiles: ['minio', 'full']
     restart: unless-stopped
-    networks:
-      - openwa-network
     security_opt:
       - 'no-new-privileges:true'
     command: server /data --console-address ":9001"
@@ -390,18 +370,3 @@ volumes:
   minio-data:
     name: openwa_minio-data
     driver: local
-
-networks:
-  # Application network — datastores and openwa-api. Keep the name `openwa-network`:
-  # docker.service.ts attaches orchestrated containers to it by literal name.
-  openwa-network:
-    name: openwa-network
-  # Isolated network for the Docker socket proxy. `internal: true` means no external
-  # connectivity; only openwa-api joins it, so nothing else can reach docker-proxy:2375.
-  internal-docker:
-    name: openwa-internal-docker
-    internal: true
-  # Coolify network — connects openwa-api to separately-hosted datastores (PostgreSQL, Redis) and Traefik in Coolify.
-  coolify:
-    name: coolify
-    external: true

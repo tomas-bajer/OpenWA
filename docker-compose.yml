@@ -66,7 +66,7 @@ services:
     networks:
       - openwa-network
       - internal-docker
-      - default
+      - coolify
     # Container hardening: Chromium runs with --no-sandbox, so the
     # container itself is the confinement boundary. cap_drop ALL + a minimal re-add
     # ONLY for the root entrypoint's chown + gosu privilege-drop; once gosu setuids to
@@ -401,5 +401,7 @@ networks:
   internal-docker:
     name: openwa-internal-docker
     internal: true
-  # Default network — connects openwa-api to separately-hosted datastores or reverse proxies (Coolify/Traefik).
-  default:
+  # Coolify network — connects openwa-api to separately-hosted datastores (PostgreSQL, Redis) and Traefik in Coolify.
+  coolify:
+    name: coolify
+    external: true
